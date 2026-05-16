@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Tienda Online</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; text-align: center; }
+        .grid-catalogo { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; max-width: 1200px; margin: 30px auto 0 auto; }
+        .tarjeta-producto { background: #fff; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); overflow: hidden; display: flex; flex-direction: column; transition: 0.2s; text-align: left; }
+        .tarjeta-producto:hover { transform: translateY(-5px); box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
+        .contenedor-imagen { width: 100%; height: 220px; background-color: #eef1f5; }
+        .contenedor-imagen img { width: 100%; height: 100%; object-fit: cover; }
+        .info-producto { padding: 15px; display: flex; flex-direction: column; flex-grow: 1; }
+        .titulo-producto { font-size: 14pt; font-weight: bold; color: #333; margin: 0 0 8px 0; }
+        .descripcion-producto { font-size: 10pt; color: #666; margin: 0 0 12px 0; flex-grow: 1; }
+        .precio-producto { font-size: 16pt; font-weight: bold; color: #2ecc71; margin-bottom: 15px; }
+        .btn-whatsapp { display: block; text-align: center; background-color: #25d366; color: white; text-decoration: none; padding: 10px; border-radius: 8px; font-weight: bold; }
+        .error-msg { color: #e74c3c; font-size: 16pt; margin-top: 50px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1 id="nombre-tienda">Cargando Tienda...</h1>
+    <div id="status-message">Buscando productos en el inventario...</div>
+    <div class="grid-catalogo" id="contenedor-catalogo"></div>
+
+    <script>
+        // 1. LEER EL ID DESDE LA URL (?id=LO_QUE_SEA)
+        const urlParams = new URLSearchParams(window.location.search);
+        const SHEET_ID = urlParams.get('id');
+
+        if (!SHEET_ID) {
+            document.getElementById('status-message').innerHTML = "<div class='error-msg'>❌ Enlace no válido. Falta el identificador de la tienda.</div>";
+            document.getElementById('nombre-tienda').innerText = "Error de Conexión";
+        } else {
+            // URL de Google Sheets optimizada para responder en formato CSV de forma pública e inmediata
+            const url_csv = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
+            cargarProductos(url_csv);
+        }
+
+        async function cargarProductos(url) {
+            try {
+                const respuesta = await fetch(url);
+                if (!respuesta.ok) throw new Error();
+                
+                const datosTexto = await respuesta.text();
+                
+                // Procesar las líneas del CSV de forma simple
+                const filas = datosTexto.split('\n').map(fila => {
+                    return fila.split('","').map(celda => celda.replace(/^"|"$/g, '').trim());
+                });
+
+                const contenedor = document.getElementById('contenedor-catalogo');
+                document.getElementById('status-message').style.display = 'none';
+                document.getElementById('nombre-tienda').innerText = "Catálogo de Productos";
+
+                // Recorrer filas omitiendo los encabezados
+                for (let i = 1; i < filas.length; i++) {
+                    const col = filas[i];
+                    if (col.length < 5 || !col[1]) continue; 
+
+                    const titulo = col[1];
+                    const descripcion = col[2] || '';
+                    const precio = col[3] || '0';
+                    const urlImagen = col[4] || 'https://via.placeholder.com/300x220?text=Sin+Foto';
+                    const linkWhatsapp = col[5] || '#';
+
+                    const tarjeta = document.createElement('div');
+                    tarjeta.className = 'tarjeta-producto';
+                    tarjeta.innerHTML = `
+                        <div class="contenedor-imagen">
+                            <img src="${urlImagen}" onerror="this.src='https://via.placeholder.com/300x220?text=Error+al+cargar+foto'">
+                        </div>
+                        <div class="info-producto">
+                            <h3 class="titulo-producto">${titulo}</h3>
+                            <p class="descripcion-producto">${descripcion}</p>
+                            <div class="precio-producto">$${precio}</div>
+                            <a href="${linkWhatsapp}" target="_blank" class="btn-whatsapp">💬 Consultar por WhatsApp</a>
+                        </div>
+                    `;
+                    contenedor.appendChild(tarjeta);
+                }
+            } catch (error) {
+                document.getElementById('status-message').innerHTML = "<div class='error-msg'>❌ Error al conectar con el inventario.<br><br><span style='font-size:12pt; font-weight:normal; color:#555;'>Asegúrate de que la aplicación haya terminado de sincronizar los datos.</span></div>";
+                document.getElementById('nombre-tienda').innerText = "Tienda Privada o Inexistente";
+            }
+        }
+    </script>
+</body>
+</html>
