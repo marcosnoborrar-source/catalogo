@@ -27,4 +27,5 @@ jobs:
       env:
         FIREBASE_SECRETS_JSON: ${{ secrets.FIREBASE_SECRETS_JSON }}
         GOOGLE_TOKEN_JSON: ${{ secrets.GOOGLE_TOKEN_JSON }}
+        FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
       run: python limpiador_inactivos.py
