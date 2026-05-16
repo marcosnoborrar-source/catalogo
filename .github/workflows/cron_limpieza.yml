@@ -2,10 +2,8 @@ name: Tarea Automatizada de Limpieza de Inventarios
 
 on:
   schedule:
-    # Se ejecuta todos los días a las 04:00 AM UTC (Aproximadamente 01:00 AM en Argentina)
     - cron: '0 4 * * *'
   workflow_dispatch:
-    # Esto te permite activar la limpieza manualmente desde la web cuando quieras probarla
 
 jobs:
   limpieza:
@@ -13,12 +11,12 @@ jobs:
 
     steps:
     - name: Clonar el repositorio
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Configurar entorno de Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
-        python-python-version: '3.10'
+        python-version: '3.10' # Corregido: antes decía python-python-version
 
     - name: Instalar librerías necesarias
       run: |
@@ -27,7 +25,6 @@ jobs:
 
     - name: Ejecutar Script de Supervisión de Inactivos
       env:
-        # Inyectamos de forma segura las credenciales ocultas en las variables de entorno del contenedor
         FIREBASE_SECRETS_JSON: ${{ secrets.FIREBASE_SECRETS_JSON }}
         GOOGLE_TOKEN_JSON: ${{ secrets.GOOGLE_TOKEN_JSON }}
       run: python limpiador_inactivos.py
