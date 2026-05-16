@@ -3,88 +3,244 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Tienda Online</title>
+    <title>Tienda Oficial</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; text-align: center; }
-        .grid-catalogo { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; max-width: 1200px; margin: 30px auto 0 auto; }
-        .tarjeta-producto { background: #fff; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); overflow: hidden; display: flex; flex-direction: column; transition: 0.2s; text-align: left; }
-        .tarjeta-producto:hover { transform: translateY(-5px); box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
-        .contenedor-imagen { width: 100%; height: 220px; background-color: #eef1f5; }
-        .contenedor-imagen img { width: 100%; height: 100%; object-fit: cover; }
-        .info-producto { padding: 15px; display: flex; flex-direction: column; flex-grow: 1; }
-        .titulo-producto { font-size: 14pt; font-weight: bold; color: #333; margin: 0 0 8px 0; }
-        .descripcion-producto { font-size: 10pt; color: #666; margin: 0 0 12px 0; flex-grow: 1; }
-        .precio-producto { font-size: 16pt; font-weight: bold; color: #2ecc71; margin-bottom: 15px; }
-        .btn-whatsapp { display: block; text-align: center; background-color: #25d366; color: white; text-decoration: none; padding: 10px; border-radius: 8px; font-weight: bold; }
-        .error-msg { color: #e74c3c; font-size: 16pt; margin-top: 50px; font-weight: bold; }
+        :root { --primary: #25d366; --dark: #1e1e24; --light: #f4f6f9; --text-muted: #6c757d; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--light); margin: 0; padding: 0; color: var(--dark); }
+        
+        /* HEADER PREMIUM */
+        .header-tienda { background: white; padding: 30px 20px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .logo-tienda { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; background: #eef1f5; border: 3px solid var(--primary); }
+        .nombre-tienda { font-size: 24pt; font-weight: bold; margin: 10px 0 5px 0; }
+        .info-tienda-top { font-size: 10pt; color: var(--text-muted); max-width: 600px; margin: 0 auto; line-height: 1.6; }
+        .redes-links a { color: var(--primary); margin: 0 8px; text-decoration: none; font-weight: bold; font-size: 11pt; }
+
+        /* PESTAÑAS DE NAVEGACIÓN */
+        .tabs-contenedor { display: flex; justify-content: center; gap: 15px; margin: 25px 0; }
+        .tab-btn { padding: 10px 25px; border: none; background: white; border-radius: 25px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.2s; }
+        .tab-btn.active { background: var(--primary); color: white; }
+
+        /* GRID Y TARJETAS */
+        .grid-catalogo { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .tarjeta-producto { background: white; border-radius: 16px; box-shadow: 0 6px 18px rgba(0,0,0,0.03); overflow: hidden; display: flex; flex-direction: column; position: relative; }
+        .contenedor-imagen { width: 100%; height: 260px; background-color: #fff; display: flex; align-items: center; justify-content: center; }
+        .contenedor-imagen img { width: 100%; height: 100%; object-fit: contain; background: #fafafa; }
+        .badge-agotado { position: absolute; top: 15px; left: 15px; background: #e74c3c; color: white; padding: 5px 12px; border-radius: 20px; font-size: 9pt; font-weight: bold; }
+        .info-producto { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; }
+        .categoria-label { font-size: 8pt; text-transform: uppercase; letter-spacing: 1px; color: var(--primary); font-weight: bold; margin-bottom: 5px; }
+        .titulo-producto { font-size: 13pt; font-weight: bold; margin: 0 0 8px 0; }
+        .precio-producto { font-size: 16pt; font-weight: 800; color: var(--dark); margin-bottom: 15px; }
+        
+        /* BOTONES */
+        .btn-accion { border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; width: 100%; box-sizing: border-box; }
+        .btn-comprar { background-color: var(--primary); color: white; font-size: 11pt; }
+        .btn-agotado { background-color: #eef1f5; color: var(--text-muted); cursor: not-allowed; }
+
+        /* CARRITO FLOTANTE */
+        .carrito-flotante { position: fixed; bottom: 30px; right: 30px; background: var(--dark); color: white; padding: 15px 25px; border-radius: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); cursor: pointer; display: none; font-weight: bold; z-index: 1000; }
+
+        /* FOOTER LEGAL */
+        footer { margin-top: 80px; background: #eef1f5; padding: 30px 20px; text-align: center; font-size: 9pt; color: var(--text-muted); border-top: 1px solid #e2e8f0; }
+        footer a { color: var(--text-muted); margin: 0 10px; }
     </style>
 </head>
 <body>
 
-    <h1 id="nombre-tienda">Cargando Tienda...</h1>
-    <div id="status-message">Buscando productos en el inventario...</div>
-    <div class="grid-catalogo" id="contenedor-catalogo"></div>
+    <header class="header-tienda">
+        <img id="store-logo" class="logo-tienda" src="https://via.placeholder.com/100?text=Logo" alt="Logo">
+        <div id="store-name" class="nombre-tienda">Cargando Tienda...</div>
+        <div id="store-info" class="info-tienda-top"></div>
+        <div id="store-socials" class="redes-links" style="margin-top: 10px;"></div>
+    </header>
+
+    <div class="tabs-contenedor">
+        <button class="tab-btn active" onclick="cambiarTab('disponibles')">🛍️ En Stock</button>
+        <button class="tab-btn" onclick="cambiarTab('agotados')">⏳ Próximamente / Agotados</button>
+    </div>
+
+    <main class="grid-catalogo" id="contenedor-catalogo"></main>
+
+    <div id="carrito-btn" class="carrito-flotante" onclick="enviarPedidoWhatsApp()">
+        🛒 Ver Pedido (<span id="carrito-contador">0</span>) - Enviar por WhatsApp
+    </div>
+
+    <footer>
+        <p>© <span id="year"></span> <span id="footer-store-name"></span>. Todos los derechos reservados.</p>
+        <p>
+            <a href="#" onclick="alert('Políticas de Privacidad:\nLos datos de contacto recolectados mediante WhatsApp se usan exclusivamente para procesar la entrega de su pedido legítimo de compra.')">Política de Privacidad</a> | 
+            <a href="#" onclick="alert('Políticas de Devolución:\nSi el producto presenta fallas de fábrica, cuenta con 30 días para coordinar el cambio directo por el mismo canal de atención.')">Políticas de Devolución</a>
+        </p>
+    </footer>
 
     <script>
-        // 1. LEER EL ID DESDE LA URL (?id=LO_QUE_SEA)
+        document.getElementById('year').innerText = new Date().getFullYear();
+        
         const urlParams = new URLSearchParams(window.location.search);
         const SHEET_ID = urlParams.get('id');
+        
+        let productosDisponibles = [];
+        let productosAgotados = [];
+        let tabActual = 'disponibles';
+        let carrito = {};
+        let telefonoWhatsAppTienda = "5491123456789"; // Por defecto
 
-        if (!SHEET_ID) {
-            document.getElementById('status-message').innerHTML = "<div class='error-msg'>❌ Enlace no válido. Falta el identificador de la tienda.</div>";
-            document.getElementById('nombre-tienda').innerText = "Error de Conexión";
-        } else {
-            // URL de Google Sheets optimizada para responder en formato CSV de forma pública e inmediata
-            const url_csv = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
-            cargarProductos(url_csv);
+        if (SHEET_ID) {
+            // Cargar pestaña de Productos (Gid 0 o primera hoja)
+            const url_productos = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Productos`;
+            // Cargar pestaña de Configuración
+            const url_config = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Configuracion`;
+            
+            cargarConfiguracion(url_config);
+            cargarProductos(url_productos);
+        }
+
+        async function cargarConfiguracion(url) {
+            try {
+                const res = await fetch(url);
+                const texto = await res.text();
+                const filas = texto.split('\n').map(f => f.split('","').map(c => c.replace(/^"|"$/g, '').trim()));
+                
+                // Mapeo simple de clave-valor desde la segunda hoja
+                if(filas.length > 1) {
+                    const nombre = filas[1][0] || "Mi Tienda Virtual";
+                    telefonoWhatsAppTienda = filas[1][1] || "5491123456789";
+                    const direccion = filas[1][2] || "";
+                    const horarios = filas[1][3] || "";
+                    const urlLogo = filas[1][4] || "https://via.placeholder.com/100?text=Shop";
+                    const redes = filas[1][5] || "";
+
+                    document.getElementById('store-name').innerText = nombre;
+                    document.getElementById('footer-store-name').innerText = nombre;
+                    document.getElementById('store-logo').src = urlLogo;
+                    document.getElementById('store-info').innerHTML = `📍 ${direccion} <br> 🕒 ${horarios}`;
+                    
+                    if(redes) {
+                        document.getElementById('store-socials').innerHTML = `<a href="${redes}" target="_blank">📸 Síguenos en Redes Sociales</a>`;
+                    }
+                }
+            } catch(e) { console.log("Usando configuración por defecto."); }
         }
 
         async function cargarProductos(url) {
             try {
                 const respuesta = await fetch(url);
-                if (!respuesta.ok) throw new Error();
-                
                 const datosTexto = await respuesta.text();
-                
-                // Procesar las líneas del CSV de forma simple
-                const filas = datosTexto.split('\n').map(fila => {
-                    return fila.split('","').map(celda => celda.replace(/^"|"$/g, '').trim());
-                });
+                const filas = datosTexto.split('\n').map(f => f.split('","').map(c => c.replace(/^"|"$/g, '').trim()));
 
-                const contenedor = document.getElementById('contenedor-catalogo');
-                document.getElementById('status-message').style.display = 'none';
-                document.getElementById('nombre-tienda').innerText = "Catálogo de Productos";
-
-                // Recorrer filas omitiendo los encabezados
                 for (let i = 1; i < filas.length; i++) {
                     const col = filas[i];
-                    if (col.length < 5 || !col[1]) continue; 
+                    if (col.length < 6 || !col[1]) continue; 
 
-                    const titulo = col[1];
-                    const descripcion = col[2] || '';
-                    const precio = col[3] || '0';
-                    const urlImagen = col[4] || 'https://via.placeholder.com/300x220?text=Sin+Foto';
-                    const linkWhatsapp = col[5] || '#';
+                    const producto = {
+                        sku: col[0],
+                        titulo: col[1],
+                        categoria: col[2],
+                        precio: col[4], // Columna E (Precio Venta)
+                        stock: parseInt(col[5]) || 0, // Columna F (Cantidad)
+                        foto: col[7] || 'https://via.placeholder.com/300x260?text=Sin+Foto',
+                        descripcion: col[8] || ''
+                    };
 
-                    const tarjeta = document.createElement('div');
-                    tarjeta.className = 'tarjeta-producto';
-                    tarjeta.innerHTML = `
-                        <div class="contenedor-imagen">
-                            <img src="${urlImagen}" onerror="this.src='https://via.placeholder.com/300x220?text=Error+al+cargar+foto'">
-                        </div>
-                        <div class="info-producto">
-                            <h3 class="titulo-producto">${titulo}</h3>
-                            <p class="descripcion-producto">${descripcion}</p>
-                            <div class="precio-producto">$${precio}</div>
-                            <a href="${linkWhatsapp}" target="_blank" class="btn-whatsapp">💬 Consultar por WhatsApp</a>
-                        </div>
-                    `;
-                    contenedor.appendChild(tarjeta);
+                    if (producto.stock > 0) {
+                        productosDisponibles.push(producto);
+                    } else {
+                        productosAgotados.push(producto);
+                    }
                 }
+                renderizarCatalogo();
             } catch (error) {
-                document.getElementById('status-message').innerHTML = "<div class='error-msg'>❌ Error al conectar con el inventario.<br><br><span style='font-size:12pt; font-weight:normal; color:#555;'>Asegúrate de que la aplicación haya terminado de sincronizar los datos.</span></div>";
-                document.getElementById('nombre-tienda').innerText = "Tienda Privada o Inexistente";
+                document.getElementById('contenedor-catalogo').innerHTML = "<h2>Error al conectar con el inventario.</h2>";
             }
+        }
+
+        function renderizarCatalogo() {
+            const contenedor = document.getElementById('contenedor-catalogo');
+            contenedor.innerHTML = '';
+            const lista = (tabActual === 'disponibles') ? productosDisponibles : productosAgotados;
+
+            if(lista.length === 0) {
+                contenedor.innerHTML = `<div style='grid-column: 1/-1; text-align:center; color:gray; padding:40px;'>No hay artículos para mostrar en esta sección.</div>`;
+                return;
+            }
+
+            lista.forEach(p => {
+                const tarjeta = document.createElement('div');
+                tarjeta.className = 'tarjeta-producto';
+                
+                let botonHTML = `<button class="btn-accion btn-comprar" onclick="agregarAlCarrito('${p.sku}', '${p.titulo}', ${p.precio})">🛒 Agregar al Carrito</button>`;
+                let badgeAgotado = '';
+
+                if (tabActual === 'agotados') {
+                    botonHTML = `<button class="btn-accion btn-agotado" disabled>❌ Sin Stock / Próximamente</button>`;
+                    badgeAgotado = `<div class="badge-agotado">AGOTADO</div>`;
+                }
+
+                tarjeta.innerHTML = `
+                    ${badgeAgotado}
+                    <div class="contenedor-imagen">
+                        <img src="${p.foto}" onerror="this.src='https://via.placeholder.com/300x260?text=Error+Foto'">
+                    </div>
+                    <div class="info-producto">
+                        <span class="categoria-label">${p.categoria}</span>
+                        <h3 class="titulo-producto">${p.titulo}</h3>
+                        <p style="font-size:9.5pt; color:#555; flex-grow:1; margin:0 0 15px 0;">${p.descripcion}</p>
+                        <div class="precio-producto">$${p.precio}</div>
+                        ${botonHTML}
+                    </div>
+                `;
+                contenedor.appendChild(tarjeta);
+            });
+        }
+
+        function cambiarTab(tab) {
+            tabActual = tab;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderizarCatalogo();
+        }
+
+        function agregarAlCarrito(sku, titulo, precio) {
+            if (!carrito[sku]) {
+                carrito[sku] = { titulo: titulo, precio: precio, cantidad: 0 };
+            }
+            carrito[sku].cantidad += 1;
+            actualizarInterfazCarrito();
+        }
+
+        function actualizarInterfazCarrito() {
+            let totalItems = 0;
+            for (let sku in carrito) {
+                totalItems += carrito[sku].cantidad;
+            }
+            
+            const btn = document.getElementById('carrito-btn');
+            if (totalItems > 0) {
+                btn.style.display = 'block';
+                document.getElementById('carrito-contador').innerText = totalItems;
+            } else {
+                btn.style.display = 'none';
+            }
+        }
+
+        function enviarPedidoWhatsApp() {
+            let mensaje = "🛍️ *¡Hola! Quiero realizar el siguiente pedido:* \n\n";
+            let totalGral = 0;
+
+            for (let sku in carrito) {
+                let item = carrito[sku];
+                let subtotal = item.precio * item.cantidad;
+                totalGral += subtotal;
+                mensaje += `• *${item.titulo}* (x${item.cantidad}) -> _$${subtotal}_\n`;
+            }
+
+            mensaje += `\n💰 *Total a pagar:* $${totalGral}\n\n`;
+            mensaje += "¿Me confirmarías la disponibilidad para coordinar el pago y la entrega?";
+
+            const mensajeCodificado = encodeURIComponent(mensaje);
+            const urlWhatsApp = `https://wa.me/${telefonoWhatsAppTienda}?text=${mensajeCodificado}`;
+            
+            // Abrir canal de atención final
+            window.open(urlWhatsApp, '_blank');
         }
     </script>
 </body>
